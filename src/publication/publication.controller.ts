@@ -3,13 +3,13 @@ import {
     Controller,
     Delete,
     Get,
-    Param,
-    Patch,
     Post,
     UseGuards,
     Headers,
     Req,
     Request,
+    Put,
+    Param,
 } from '@nestjs/common';
 import { PublicationService } from './publication.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
@@ -24,8 +24,11 @@ export class PublicationController {
     @Post()
     @Roles('AUTHOR', 'REDACTOR')
     @UseGuards(RolesGuard)
-    create(@Body() createPublicationDto: CreatePublicationDto) {
-        return this.publicationService.create(createPublicationDto);
+    create(
+        @Body() createPublicationDto: CreatePublicationDto,
+        @Request() req: any,
+    ) {
+        return this.publicationService.create(createPublicationDto, req);
     }
 
     @Get()
@@ -40,7 +43,7 @@ export class PublicationController {
         return this.publicationService.getPublished();
     }
 
-    @Patch('/:publicationId')
+    @Put('/:publicationId')
     @Roles('REDACTOR', 'AUTHOR')
     @UseGuards(RolesGuard)
     updatePublication(
@@ -53,6 +56,16 @@ export class PublicationController {
             updatePublicationDto,
             req,
         );
+    }
+
+    @Put('/:publicationId')
+    @Roles('AUTHOR')
+    @UseGuards(RolesGuard)
+    publicated(
+        @Param('publicationId') publicationId: number,
+        @Request() req: any,
+    ) {
+        return this.publicationService.publicated(publicationId, req);
     }
 
     @Get()

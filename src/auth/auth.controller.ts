@@ -17,18 +17,4 @@ export class AuthController {
     signIn(@Body() userDto: CreateClientDto) {
         return this.authService.signIn(userDto);
     }
-
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
-    @Post('signUpRedactor')
-    signUpRedactor(@Body() userDto: CreateClientDto) {
-        return this.authService.signUp(userDto);
-    }
-
-    @Roles('ADMIN')
-    @UseGuards(RolesGuard)
-    @Post('signUp')
-    signUpAdmin(@Body() userDto: CreateClientDto) {
-        return this.authService.signUp(userDto);
-    }
 }

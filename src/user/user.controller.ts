@@ -3,10 +3,10 @@ import {
     Controller,
     Get,
     Param,
-    Patch,
     Post,
     UseGuards,
     Request,
+    Put,
 } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UserService } from './user.service';
@@ -29,27 +29,24 @@ export class UserController {
         return this.userService.getAllUsers();
     }
 
-    @Patch('/:authorId')
+    @Put('/:authorId')
     @Roles('REDACTOR')
     @UseGuards(RolesGuard)
     setPublished(@Param('authorId') authorId: number) {
         return this.userService.setPublished(authorId);
     }
 
-    @Patch('/:publicationId')
-    @Roles('AUTHOR')
-    @UseGuards(RolesGuard)
-    publicated(
-        @Param('publicationId') publicationId: number,
-        @Request() req: any,
-    ) {
-        return this.userService.publicated(publicationId, req);
-    }
-
-    @Patch('/:userId')
+    @Put('/:userId')
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     setRedactor(@Param('userId') userId: number) {
         return this.userService.setRedactor(userId);
+    }
+
+    @Put('/:userId')
+    @Roles('ADMIN')
+    @UseGuards(RolesGuard)
+    setAdmin(@Param('userId') userId: number) {
+        return this.userService.setAdmin(userId);
     }
 }

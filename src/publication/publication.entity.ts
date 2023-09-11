@@ -26,6 +26,9 @@ export class Publication {
     @JoinColumn()
     author: User;
 
+    @Column()
+    authorId: number;
+
     @Column({ default: false })
     publicated: boolean;
 }

@@ -38,43 +38,9 @@ export class AuthService {
         return this.generateToken(user);
     }
 
-    async signUpRedactor(userDto: CreateClientDto) {
-        const candidate = await this.userService.getUserByEmail(userDto.email);
-        if (candidate) {
-            throw new HttpException(
-                `User with this email already exist`,
-                HttpStatus.BAD_REQUEST,
-            );
-        }
-        const hashPassword = await bcrypt.hash(userDto.password, 5);
-        const user = await this.userService.create({
-            ...userDto,
-            password: hashPassword,
-        });
-        return userDto;
-    }
-
-    async signUpAdmin(userDto: CreateClientDto) {
-        const candidate = await this.userService.getUserByEmail(userDto.email);
-        if (candidate) {
-            throw new HttpException(
-                `User with this email already exist`,
-                HttpStatus.BAD_REQUEST,
-            );
-        }
-        const hashPassword = await bcrypt.hash(userDto.password, 5);
-        const user = await this.userService.create({
-            ...userDto,
-            password: hashPassword,
-        });
-        return userDto;
-    }
-
     async generateToken(user: User) {
         const payload = {
-            email: user.email,
             id: user.id,
-            role: user.roleValue,
         };
         return {
             token: this.jwtService.sign(payload),
