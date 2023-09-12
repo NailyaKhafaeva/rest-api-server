@@ -19,7 +19,7 @@ export class Publication {
     @Column()
     content: string;
 
-    @Column({ nullable: true, array: true })
+    @Column({ type: 'json', nullable: true })
     images: string[];
 
     @ManyToOne(() => User, (user) => user.publications)

@@ -5,13 +5,13 @@ import { Repository } from 'typeorm';
 import { CreateClientDto } from './dto/create-client.dto';
 import { PublicationService } from 'src/publication/publication.service';
 import { RoleService } from 'src/role/role.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
         private roleService: RoleService,
-        private publicationService: PublicationService,
     ) {}
 
     async create(createClientDto: CreateClientDto) {
@@ -42,6 +42,20 @@ export class UserService {
 
     async getAllUsers() {
         const users = await this.userRepository.find();
+        return users;
+    }
+
+    async getAuthors() {
+        const users = await this.userRepository.find({
+            where: { roleValue: 'AUTHOR' },
+        });
+        return users;
+    }
+
+    async getRedactors() {
+        const users = await this.userRepository.find({
+            where: { roleValue: 'REDACTOR' },
+        });
         return users;
     }
 
@@ -110,5 +124,14 @@ export class UserService {
             canPublic: null,
             active: true,
         });
+    }
+
+    async changePassword(changePasswordDto: ChangePasswordDto) {
+        const user = await this.getUserByEmail(changePasswordDto.email);
+
+        user.password = changePasswordDto.newPassword;
+        await this.userRepository.save(user);
+
+        return { status: 200, message: `Password changed` };
     }
 }

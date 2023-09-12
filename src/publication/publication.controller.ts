@@ -5,25 +5,31 @@ import {
     Get,
     Post,
     UseGuards,
-    Headers,
-    Req,
     Request,
     Put,
     Param,
+    ValidationPipe,
+    UsePipes,
 } from '@nestjs/common';
 import { PublicationService } from './publication.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Publication } from './publication.entity';
 
+@ApiTags('Publications')
 @Controller('publication')
 export class PublicationController {
     constructor(private publicationService: PublicationService) {}
 
+    @ApiOperation({ summary: 'Create publication' })
+    @ApiResponse({ status: 200, type: Publication })
     @Post()
     @Roles('AUTHOR', 'REDACTOR')
     @UseGuards(RolesGuard)
+    @UsePipes(ValidationPipe)
     create(
         @Body() createPublicationDto: CreatePublicationDto,
         @Request() req: any,
@@ -31,21 +37,28 @@ export class PublicationController {
         return this.publicationService.create(createPublicationDto, req);
     }
 
-    @Get()
+    @ApiOperation({ summary: 'Get all publications' })
+    @ApiResponse({ status: 200, type: [Publication] })
+    @Get('/get-all')
     @Roles('ADMIN')
     @UseGuards(RolesGuard)
     getAll() {
         return this.publicationService.getAll();
     }
 
-    @Get()
+    @ApiOperation({ summary: 'Get published publications' })
+    @ApiResponse({ status: 200, type: [Publication] })
+    @Get('/get-published')
     getPublished() {
         return this.publicationService.getPublished();
     }
 
+    @ApiOperation({ summary: 'Update publication' })
+    @ApiResponse({ status: 200 })
     @Put('/:publicationId')
     @Roles('REDACTOR', 'AUTHOR')
     @UseGuards(RolesGuard)
+    @UsePipes(ValidationPipe)
     updatePublication(
         @Param('publicationId') publicationId: number,
         @Body() updatePublicationDto: UpdatePublicationDto,
@@ -58,7 +71,9 @@ export class PublicationController {
         );
     }
 
-    @Put('/:publicationId')
+    @ApiOperation({ summary: 'Publicate publication' })
+    @ApiResponse({ status: 200 })
+    @Put('/publicate/:publicationId')
     @Roles('AUTHOR')
     @UseGuards(RolesGuard)
     publicated(
@@ -67,9 +82,6 @@ export class PublicationController {
     ) {
         return this.publicationService.publicated(publicationId, req);
     }
-
-    @Get()
-    setPublicated() {}
 
     @Delete()
     delete() {}

@@ -40,4 +40,16 @@ export class RoleService {
         });
         return role;
     }
+
+    async deleteRole(value: string) {
+        const role = await this.getRoleByValue(value);
+
+        if (role) {
+            this.roleRepository.delete(role.id);
+
+            return { status: 200 };
+        }
+
+        throw new HttpException('Role not found', HttpStatus.NOT_FOUND);
+    }
 }

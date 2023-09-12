@@ -6,24 +6,21 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         private jwtService: JwtService,
+        private userService: UserService,
     ) {}
-    canActivate(
-        context: ExecutionContext,
-    ): boolean | Promise<boolean> | Observable<boolean> {
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
             const requiredPoles = this.reflector.getAllAndOverride<string>(
                 'roles',
                 [context.getHandler(), context.getClass()],
             );
-
-            console.log(requiredPoles);
 
             if (!requiredPoles) {
                 return true;
@@ -40,8 +37,10 @@ export class RolesGuard implements CanActivate {
             }
 
             const user = this.jwtService.verify(token);
+
+            const u = await this.userService.getUserById(user.id);
             req.user = user;
-            return requiredPoles.includes(user.role);
+            return requiredPoles.includes(u.roleValue);
         } catch (e) {
             throw new UnauthorizedException({
                 message: 'User unauthorized',
