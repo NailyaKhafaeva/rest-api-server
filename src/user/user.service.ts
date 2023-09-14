@@ -2,10 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
-import { CreateClientDto } from './dto/create-client.dto';
-import { PublicationService } from 'src/publication/publication.service';
 import { RoleService } from 'src/role/role.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ROLES } from 'src/role/role.entity';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Injectable()
 export class UserService {
@@ -14,9 +15,9 @@ export class UserService {
         private roleService: RoleService,
     ) {}
 
-    async create(createClientDto: CreateClientDto) {
+    async create(createUserDto: CreateUserDto) {
         const candidate = await this.userRepository.findOne({
-            where: { email: createClientDto.email },
+            where: { email: createUserDto.email },
         });
 
         if (candidate) {
@@ -26,17 +27,30 @@ export class UserService {
             );
         }
 
-        const role = await this.roleService.getRoleByValue('AUTHOR');
+        const role = await this.roleService.getRoleByValue(ROLES.AUTHOR);
 
         const user = await this.userRepository.save({
-            email: createClientDto.email,
-            password: createClientDto.password,
-            firstName: createClientDto.firstName,
-            lastName: createClientDto.lastName,
+            email: createUserDto.email,
+            password: createUserDto.password,
+            firstName: createUserDto.firstName,
+            lastName: createUserDto.lastName,
             role: role,
             active: null,
         });
 
+        return user;
+    }
+
+    async createAdmin(createAdminDto: CreateAdminDto) {
+        const user = await this.userRepository.save({
+            email: createAdminDto.email,
+            password: createAdminDto.password,
+            firstName: createAdminDto.firstName,
+            lastName: createAdminDto.lastName,
+            role: createAdminDto.role,
+            active: true,
+            canPublic: null,
+        });
         return user;
     }
 
@@ -47,14 +61,22 @@ export class UserService {
 
     async getAuthors() {
         const users = await this.userRepository.find({
-            where: { roleValue: 'AUTHOR' },
+            where: { roleValue: ROLES.AUTHOR },
         });
         return users;
     }
 
+    async getAdmin() {
+        const user = await this.userRepository.findOne({
+            where: { roleValue: ROLES.ADMIN },
+        });
+
+        return user;
+    }
+
     async getRedactors() {
         const users = await this.userRepository.find({
-            where: { roleValue: 'REDACTOR' },
+            where: { roleValue: ROLES.REDACTOR },
         });
         return users;
     }
@@ -96,7 +118,7 @@ export class UserService {
             throw new HttpException(`User doesn't exist`, HttpStatus.NOT_FOUND);
         }
 
-        const role = await this.roleService.getRoleByValue('REDACTOR');
+        const role = await this.roleService.getRoleByValue(ROLES.REDACTOR);
 
         await this.userRepository.save({
             ...user,
@@ -104,6 +126,8 @@ export class UserService {
             role,
             canPublic: null,
         });
+
+        return { status: 200, message: `Role changed` };
     }
 
     async setAdmin(userId: number) {
@@ -115,7 +139,7 @@ export class UserService {
             throw new HttpException(`User doesn't exist`, HttpStatus.NOT_FOUND);
         }
 
-        const role = await this.roleService.getRoleByValue('ADMIN');
+        const role = await this.roleService.getRoleByValue(ROLES.ADMIN);
 
         await this.userRepository.save({
             ...user,
@@ -124,6 +148,8 @@ export class UserService {
             canPublic: null,
             active: true,
         });
+
+        return { status: 200, message: `Role changed` };
     }
 
     async changePassword(changePasswordDto: ChangePasswordDto) {

@@ -10,7 +10,7 @@ import {
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Role } from './role.entity';
+import { ROLES, Role } from './role.entity';
 import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 
@@ -21,7 +21,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Create new role' })
     @ApiResponse({ status: 200, type: Role })
-    @Roles('ADMIN')
+    @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Post()
     create(@Body() createRoleDto: CreateRoleDto) {
@@ -30,7 +30,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Get all roles' })
     @ApiResponse({ status: 200, type: [Role] })
-    @Roles('ADMIN')
+    @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Get()
     getAllRoles() {
@@ -39,7 +39,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Delete role by value' })
     @ApiResponse({ status: 200 })
-    @Roles('ADMIN')
+    @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Delete('/:value')
     deleteRole(@Param('value') value: string) {

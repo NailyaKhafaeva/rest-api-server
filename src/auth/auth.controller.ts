@@ -6,13 +6,14 @@ import {
     ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateClientDto } from 'src/user/dto/create-client.dto';
 import {
     ApiOperation,
     ApiProperty,
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
+import { SignInDto } from './dto/sign-in.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 class Token {
     @ApiProperty({
@@ -30,17 +31,17 @@ export class AuthController {
 
     @ApiOperation({ summary: 'Sign up user' })
     @ApiResponse({ status: 200, type: Token })
-    @Post('signUp')
+    @Post('sign-up')
     @UsePipes(ValidationPipe)
-    signUp(@Body() userDto: CreateClientDto) {
+    signUp(@Body() userDto: CreateUserDto) {
         return this.authService.signUp(userDto);
     }
 
     @ApiOperation({ summary: 'Sign up user' })
     @ApiResponse({ status: 200, type: Token })
-    @Post('signIn')
+    @Post('sign-in')
     @UsePipes(ValidationPipe)
-    signIn(@Body() userDto: CreateClientDto) {
+    signIn(@Body() userDto: SignInDto) {
         return this.authService.signIn(userDto);
     }
 }

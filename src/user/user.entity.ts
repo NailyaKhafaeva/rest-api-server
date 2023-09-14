@@ -10,7 +10,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User {
     @ApiProperty({ example: '1', description: 'User id' })
     @PrimaryGeneratedColumn()

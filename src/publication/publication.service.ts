@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
 import { UserService } from 'src/user/user.service';
+import { ROLES } from 'src/role/role.entity';
 
 @Injectable()
 export class PublicationService {
@@ -111,5 +112,35 @@ export class PublicationService {
         await this.publicationRepository.save(publication);
 
         return publication;
+    }
+
+    async deletePublication(id: number, req: any) {
+        const publication = await this.publicationRepository.findOne({
+            where: { id: id },
+        });
+
+        if (!publication) {
+            throw new HttpException(
+                `Publication not found`,
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        if (
+            (await this.userService.getUserById(req.user.id)).roleValue ===
+            ROLES.ADMIN
+        ) {
+            await this.publicationRepository.delete(publication.id);
+
+            return { status: 200, message: 'Publication successfully deleted' };
+        }
+
+        if (publication.authorId !== req.user.id) {
+            throw new HttpException(`Bad request`, HttpStatus.BAD_REQUEST);
+        }
+
+        await this.publicationRepository.delete(publication.id);
+
+        return { status: 200, message: 'Publication successfully deleted' };
     }
 }

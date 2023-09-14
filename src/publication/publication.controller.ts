@@ -18,6 +18,7 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Publication } from './publication.entity';
+import { ROLES } from 'src/role/role.entity';
 
 @ApiTags('Publications')
 @Controller('publication')
@@ -27,7 +28,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Create publication' })
     @ApiResponse({ status: 200, type: Publication })
     @Post()
-    @Roles('AUTHOR', 'REDACTOR')
+    @Roles(ROLES.AUTHOR, ROLES.REDACTOR)
     @UseGuards(RolesGuard)
     @UsePipes(ValidationPipe)
     create(
@@ -40,7 +41,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Get all publications' })
     @ApiResponse({ status: 200, type: [Publication] })
     @Get('/get-all')
-    @Roles('ADMIN')
+    @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     getAll() {
         return this.publicationService.getAll();
@@ -56,7 +57,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Update publication' })
     @ApiResponse({ status: 200 })
     @Put('/:publicationId')
-    @Roles('REDACTOR', 'AUTHOR')
+    @Roles(ROLES.AUTHOR, ROLES.REDACTOR)
     @UseGuards(RolesGuard)
     @UsePipes(ValidationPipe)
     updatePublication(
@@ -74,7 +75,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Publicate publication' })
     @ApiResponse({ status: 200 })
     @Put('/publicate/:publicationId')
-    @Roles('AUTHOR')
+    @Roles(ROLES.AUTHOR)
     @UseGuards(RolesGuard)
     publicated(
         @Param('publicationId') publicationId: number,
@@ -83,6 +84,12 @@ export class PublicationController {
         return this.publicationService.publicated(publicationId, req);
     }
 
-    @Delete()
-    delete() {}
+    @ApiOperation({ summary: 'Delete publication' })
+    @ApiResponse({ status: 200 })
+    @Delete('/:id')
+    @Roles(ROLES.AUTHOR, ROLES.ADMIN)
+    @UseGuards(RolesGuard)
+    delete(@Param('id') id: number, @Request() req: any) {
+        return this.publicationService.deletePublication(id, req);
+    }
 }
