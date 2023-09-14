@@ -34,7 +34,7 @@ export class RolesGuard implements CanActivate {
 
                 if (bearer !== 'Bearer' || !token) {
                     throw new UnauthorizedException({
-                        message: 'User unauthorized',
+                        message: `User unauthorized`,
                     });
                 }
 

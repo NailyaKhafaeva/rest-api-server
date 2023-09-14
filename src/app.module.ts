@@ -5,7 +5,7 @@ import { PublicationModule } from './publication/publication.module';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
-import { Role } from './role/role.entity';
+import { ROLES, Role } from './role/role.entity';
 import { Publication } from './publication/publication.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserService } from './user/user.service';
@@ -43,21 +43,24 @@ export class AppModule {
     async onModuleInit() {
         const admin = await this.userService.getAdmin();
 
-        const role = await this.roleService.getRoleByValue('ADMIN');
+        const role = await this.roleService.getRoleByValue(ROLES.ADMIN);
 
         if (!role) {
             const adminRole = await this.roleService.create({
-                value: 'ADMIN',
+                value: ROLES.ADMIN,
             });
 
             await this.roleService.create({
-                value: 'AUTHOR',
+                value: ROLES.AUTHOR,
             });
             await this.roleService.create({
-                value: 'REDACTOR',
+                value: ROLES.REDACTOR,
             });
 
-            const hashPassword = await bcrypt.hash('admin123', 5);
+            const hashPassword = await bcrypt.hash(
+                'admin123',
+                process.env.SALT,
+            );
 
             const newAdmin = {
                 email: 'admin@gmail.com',
