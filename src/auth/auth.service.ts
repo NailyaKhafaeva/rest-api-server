@@ -33,7 +33,7 @@ export class AuthService {
         }
         const hashPassword = await bcrypt.hash(
             userDto.password,
-            process.env.SALT,
+            Number(process.env.SALT),
         );
         const user = await this.userService.create({
             ...userDto,

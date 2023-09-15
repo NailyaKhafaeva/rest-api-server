@@ -59,7 +59,7 @@ export class AppModule {
 
             const hashPassword = await bcrypt.hash(
                 'admin123',
-                process.env.SALT,
+                Number(process.env.SALT),
             );
 
             const newAdmin = {
