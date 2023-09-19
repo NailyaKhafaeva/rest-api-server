@@ -35,7 +35,8 @@ export class PublicationController {
         @Body() createPublicationDto: CreatePublicationDto,
         @Request() req: any,
     ) {
-        return this.publicationService.create(createPublicationDto, req);
+        const userId = req?.user.id;
+        return this.publicationService.create(createPublicationDto, userId);
     }
 
     @ApiOperation({ summary: 'Get all publications' })
@@ -65,10 +66,13 @@ export class PublicationController {
         @Body() updatePublicationDto: UpdatePublicationDto,
         @Request() req: any,
     ) {
+        const userId = req?.user.id;
+        const userRole = req?.user.role;
         return this.publicationService.updatePublication(
             publicationId,
             updatePublicationDto,
-            req,
+            userId,
+            userRole,
         );
     }
 
@@ -81,7 +85,8 @@ export class PublicationController {
         @Param('publicationId') publicationId: number,
         @Request() req: any,
     ) {
-        return this.publicationService.publicated(publicationId, req);
+        const userId = req?.user.id;
+        return this.publicationService.publicated(publicationId, userId);
     }
 
     @ApiOperation({ summary: 'Delete publication' })
@@ -90,6 +95,8 @@ export class PublicationController {
     @Roles(ROLES.AUTHOR, ROLES.ADMIN)
     @UseGuards(RolesGuard)
     delete(@Param('id') id: number, @Request() req: any) {
-        return this.publicationService.deletePublication(id, req);
+        const userId = req?.user.id;
+        const userRole = req?.user.role;
+        return this.publicationService.deletePublication(id, userId, userRole);
     }
 }

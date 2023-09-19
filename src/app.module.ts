@@ -4,28 +4,17 @@ import { ConfigModule } from '@nestjs/config';
 import { PublicationModule } from './publication/publication.module';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
-import { User } from './user/user.entity';
-import { ROLES, Role } from './role/role.entity';
-import { Publication } from './publication/publication.entity';
+import { ROLES } from './role/role.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserService } from './user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { RoleService } from './role/role.service';
+import { dataSourceOptions } from 'db/data-source';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
-        TypeOrmModule.forRoot({
-            type: 'mysql',
-            host: process.env.MYSQL_HOST,
-            port: Number(process.env.MYSQL_PORT),
-            username: process.env.MYSQL_USERNAME,
-            password: process.env.MYSQL_PASSWORD,
-            database: process.env.MYSQL_DB,
-            entities: [User, Role, Publication],
-            synchronize: true,
-            autoLoadEntities: true,
-        }),
+        TypeOrmModule.forRoot(dataSourceOptions),
         PublicationModule,
         RoleModule,
         UserModule,

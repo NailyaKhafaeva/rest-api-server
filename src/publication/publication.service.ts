@@ -15,8 +15,8 @@ export class PublicationService {
         private userService: UserService,
     ) {}
 
-    async create(createPublicationDto: CreatePublicationDto, req: any) {
-        const user = await this.userService.getUserById(req.user.id);
+    async create(createPublicationDto: CreatePublicationDto, userId: number) {
+        const user = await this.userService.getUserById(userId);
 
         const publication = await this.publicationRepository.save({
             header: createPublicationDto.header,
@@ -42,35 +42,46 @@ export class PublicationService {
     async updatePublication(
         publicationId: number,
         updatePublicationDto: UpdatePublicationDto,
-        req: any,
+        userId: number,
+        userRole: string,
     ) {
-        const publication = await this.publicationRepository.findOne({
-            where: { id: publicationId },
-        });
+        if (userRole === ROLES.REDACTOR) {
+            const publication = await this.publicationRepository.findOne({
+                where: { id: publicationId },
+            });
 
-        if (!publication) {
-            throw new HttpException(
-                `Publicaton not found`,
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
-        const user = await this.userService.getUserById(req.user.id);
-
-        if (user.roleValue === 'AUTHOR') {
-            if (publication.authorId !== user.id) {
+            if (!publication) {
                 throw new HttpException(
-                    `You dont edit this publication`,
-                    HttpStatus.BAD_REQUEST,
+                    `Publicaton not found`,
+                    HttpStatus.NOT_FOUND,
                 );
             }
+
+            publication.header = updatePublicationDto.header;
+            publication.content = updatePublicationDto.content;
+            await this.publicationRepository.save(publication);
+
+            return publication;
         }
 
-        publication.header = updatePublicationDto.header;
-        publication.content = updatePublicationDto.content;
-        await this.publicationRepository.save(publication);
+        if (userRole === ROLES.REDACTOR) {
+            const publication = await this.publicationRepository.findOne({
+                where: { id: publicationId, authorId: userId },
+            });
 
-        return publication;
+            if (!publication) {
+                throw new HttpException(
+                    `Publicaton not found`,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            publication.header = updatePublicationDto.header;
+            publication.content = updatePublicationDto.content;
+            await this.publicationRepository.save(publication);
+
+            return publication;
+        }
     }
 
     async getPublicationById(id: number) {
@@ -80,8 +91,8 @@ export class PublicationService {
         return publication;
     }
 
-    async publicated(publicationId: number, req: any) {
-        const user = await this.userService.getUserById(req.user.id);
+    async publicated(publicationId: number, userId: number) {
+        const user = await this.userService.getUserById(userId);
 
         if (user.canPublic === false) {
             throw new HttpException(
@@ -90,15 +101,8 @@ export class PublicationService {
             );
         }
 
-        if (!user.publications.find((p) => p.id === publicationId)) {
-            throw new HttpException(
-                `Publication not found`,
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
         const publication = await this.publicationRepository.findOne({
-            where: { id: publicationId },
+            where: { id: publicationId, authorId: userId },
         });
 
         if (!publication) {
@@ -114,7 +118,7 @@ export class PublicationService {
         return publication;
     }
 
-    async deletePublication(id: number, req: any) {
+    async deletePublication(id: number, userId: number, userRole: string) {
         const publication = await this.publicationRepository.findOne({
             where: { id: id },
         });
@@ -126,21 +130,18 @@ export class PublicationService {
             );
         }
 
-        if (
-            (await this.userService.getUserById(req.user.id)).roleValue ===
-            ROLES.ADMIN
-        ) {
+        if (userRole === ROLES.ADMIN) {
             await this.publicationRepository.delete(publication.id);
 
-            return { status: 200, message: 'Publication successfully deleted' };
+            return { status: 200, message: `Publication successfully deleted` };
         }
 
-        if (publication.authorId !== req.user.id) {
+        if (publication.authorId !== userId) {
             throw new HttpException(`Bad request`, HttpStatus.BAD_REQUEST);
         }
 
         await this.publicationRepository.delete(publication.id);
 
-        return { status: 200, message: 'Publication successfully deleted' };
+        return { status: 200, message: `Publication successfully deleted` };
     }
 }

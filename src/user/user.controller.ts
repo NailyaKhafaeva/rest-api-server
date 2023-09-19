@@ -79,7 +79,7 @@ export class UserController {
     @ApiOperation({ summary: 'Set admin' })
     @ApiResponse({ status: 200 })
     @Put('/set-admin/:userId')
-    @Roles('ADMIN')
+    @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     setAdmin(@Param('userId') userId: number) {
         return this.userService.setAdmin(userId);
@@ -88,7 +88,7 @@ export class UserController {
     @ApiOperation({ summary: 'Change password' })
     @ApiResponse({ status: 200 })
     @Put('/change-password/:userId')
-    @Roles('AUTHOR')
+    @Roles(ROLES.AUTHOR)
     @UseGuards(RolesGuard)
     @UsePipes(ValidationPipe)
     changePassword(@Body() changePasswordDto: ChangePasswordDto) {

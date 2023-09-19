@@ -13,21 +13,19 @@ services:
         ports:
             - 5000:5000
             - 9229:9229
-        command: npm run start:dev
+        command: sh -c "npm run migration:run && npm run start:dev"
+        restart: always
         depends_on:
             - db
-        restart: always
     db:
         container_name: db
         image: mysql:8.0
-        cap_add:
-            - SYS_NICE
         restart: always
         environment:
-            - MYSQL_DATABASE=my_db
+            - MYSQL_DATABASE=test_db
             - MYSQL_ROOT_PASSWORD=password
         ports:
             - '3307:3306'
 
 volumes:
-    db:
+    db_volume:
