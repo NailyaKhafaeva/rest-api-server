@@ -64,7 +64,7 @@ export class PublicationService {
             return publication;
         }
 
-        if (userRole === ROLES.REDACTOR) {
+        if (userRole === ROLES.AUTHOR) {
             const publication = await this.publicationRepository.findOne({
                 where: { id: publicationId, authorId: userId },
             });
