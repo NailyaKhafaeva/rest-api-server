@@ -58,12 +58,16 @@ export class AuthService {
         }
         const user = await this.userService.getUserByEmail(userDto.email);
 
+        if (!user) {
+            throw new HttpException(`User not found`, HttpStatus.NOT_FOUND);
+        }
+
         const passwordEquals = await bcrypt.compare(
             userDto.password,
-            user?.password,
+            user.password,
         );
 
-        if (user && passwordEquals) {
+        if (passwordEquals) {
             return user;
         }
 

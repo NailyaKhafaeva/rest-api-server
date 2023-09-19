@@ -45,43 +45,31 @@ export class PublicationService {
         userId: number,
         userRole: string,
     ) {
-        if (userRole === ROLES.REDACTOR) {
-            const publication = await this.publicationRepository.findOne({
-                where: { id: publicationId },
-            });
-
-            if (!publication) {
-                throw new HttpException(
-                    `Publicaton not found`,
-                    HttpStatus.NOT_FOUND,
-                );
+        const isWithId = (role: ROLES) => {
+            switch (role) {
+                case ROLES.AUTHOR:
+                    return userId;
+                default:
+                    return undefined;
             }
+        };
 
-            publication.header = updatePublicationDto.header;
-            publication.content = updatePublicationDto.content;
-            await this.publicationRepository.save(publication);
+        const publication = await this.publicationRepository.findOne({
+            where: { id: publicationId, authorId: isWithId(userRole as ROLES) },
+        });
 
-            return publication;
+        if (!publication) {
+            throw new HttpException(
+                `Publicaton not found`,
+                HttpStatus.NOT_FOUND,
+            );
         }
 
-        if (userRole === ROLES.AUTHOR) {
-            const publication = await this.publicationRepository.findOne({
-                where: { id: publicationId, authorId: userId },
-            });
+        publication.header = updatePublicationDto.header;
+        publication.content = updatePublicationDto.content;
+        await this.publicationRepository.save(publication);
 
-            if (!publication) {
-                throw new HttpException(
-                    `Publicaton not found`,
-                    HttpStatus.NOT_FOUND,
-                );
-            }
-
-            publication.header = updatePublicationDto.header;
-            publication.content = updatePublicationDto.content;
-            await this.publicationRepository.save(publication);
-
-            return publication;
-        }
+        return publication;
     }
 
     async getPublicationById(id: number) {
