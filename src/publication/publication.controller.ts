@@ -19,6 +19,7 @@ import { UpdatePublicationDto } from './dto/update-publication.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Publication } from './publication.entity';
 import { ROLES } from 'src/role/role.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Publications')
 @Controller('publication')
@@ -28,6 +29,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Create publication' })
     @ApiResponse({ status: 200, type: Publication })
     @Post()
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.AUTHOR, ROLES.REDACTOR)
     @UseGuards(RolesGuard)
     @UsePipes(ValidationPipe)
@@ -35,13 +37,14 @@ export class PublicationController {
         @Body() createPublicationDto: CreatePublicationDto,
         @Request() req: any,
     ) {
-        const userId = req?.user.id;
+        const userId = req.user.id;
         return this.publicationService.create(createPublicationDto, userId);
     }
 
     @ApiOperation({ summary: 'Get all publications' })
     @ApiResponse({ status: 200, type: [Publication] })
     @Get('/get-all')
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     getAll() {
@@ -58,6 +61,7 @@ export class PublicationController {
     @ApiOperation({ summary: 'Update publication' })
     @ApiResponse({ status: 200 })
     @Put('/:publicationId')
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.AUTHOR, ROLES.REDACTOR)
     @UseGuards(RolesGuard)
     @UsePipes(ValidationPipe)
@@ -66,8 +70,8 @@ export class PublicationController {
         @Body() updatePublicationDto: UpdatePublicationDto,
         @Request() req: any,
     ) {
-        const userId = req?.user.id;
-        const userRole = req?.user.role;
+        const userId = req.user.id;
+        const userRole = req.user.role;
         return this.publicationService.updatePublication(
             publicationId,
             updatePublicationDto,
@@ -79,24 +83,26 @@ export class PublicationController {
     @ApiOperation({ summary: 'Publicate publication' })
     @ApiResponse({ status: 200 })
     @Put('/publicate/:publicationId')
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.AUTHOR)
     @UseGuards(RolesGuard)
     publicated(
         @Param('publicationId') publicationId: number,
         @Request() req: any,
     ) {
-        const userId = req?.user.id;
+        const userId = req.user.id;
         return this.publicationService.publicated(publicationId, userId);
     }
 
     @ApiOperation({ summary: 'Delete publication' })
     @ApiResponse({ status: 200 })
     @Delete('/:id')
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.AUTHOR, ROLES.ADMIN)
     @UseGuards(RolesGuard)
     delete(@Param('id') id: number, @Request() req: any) {
-        const userId = req?.user.id;
-        const userRole = req?.user.role;
+        const userId = req.user.id;
+        const userRole = req.user.role;
         return this.publicationService.deletePublication(id, userId, userRole);
     }
 }

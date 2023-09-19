@@ -53,6 +53,9 @@ export class AuthService {
     }
 
     async validateUser(userDto: SignInDto) {
+        if (!userDto) {
+            throw new HttpException(`Null data`, HttpStatus.BAD_REQUEST);
+        }
         const user = await this.userService.getUserByEmail(userDto.email);
 
         const passwordEquals = await bcrypt.compare(

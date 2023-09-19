@@ -13,6 +13,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ROLES, Role } from './role.entity';
 import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Roles')
 @Controller('role')
@@ -21,6 +22,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Create new role' })
     @ApiResponse({ status: 200, type: Role })
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Post()
@@ -30,6 +32,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Get all roles' })
     @ApiResponse({ status: 200, type: [Role] })
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Get()
@@ -39,6 +42,7 @@ export class RoleController {
 
     @ApiOperation({ summary: 'Delete role by value' })
     @ApiResponse({ status: 200 })
+    @UseGuards(JwtAuthGuard)
     @Roles(ROLES.ADMIN)
     @UseGuards(RolesGuard)
     @Delete('/:value')
